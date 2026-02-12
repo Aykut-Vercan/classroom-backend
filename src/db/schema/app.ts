@@ -39,7 +39,7 @@ export type Department = typeof departments.$inferSelect;
 export type NewDepartment = typeof departments.$inferInsert;
 
 export type Subject = typeof subjects.$inferSelect;
-export type NewSubject = typeof departments.$inferInsert;
+export type NewSubject = typeof subjects.$inferInsert;
 
 //$inferSelect = bu tabloyu SELECT edince dönecek satırın tipi.
 
