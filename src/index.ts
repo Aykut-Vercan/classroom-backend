@@ -1,8 +1,9 @@
 import express from 'express';
+import 'dotenv/config';  
 
 const app = express();
 
-const PORT: number = 8000;
+const PORT: number = parseInt(process.env.PORT || '8000');
 
 app.use(express.json());
 
@@ -13,5 +14,5 @@ app.get('/', (req, res): void => {
 });
 
 app.listen(PORT, (): void => {
-  console.log(`🚀 Sunucu çalışıyor: http://localhost:${PORT}`);
+  console.log(` Sunucu çalışıyor: http://localhost:${PORT}`);
 });
