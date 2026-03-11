@@ -9,7 +9,7 @@ const router = express.Router();
 const globalLimit = createRateLimitMiddleware(getGlobalRateLimit);
 
 //get all subjects with optional search, filtering pagination
-router.get('/', globalLimit, async (req, res) => {
+router.get('/', globalLimit, async (req, res, next) => {
 
     try {
         const { search, department, page = 1, limit = 10 } = req.query;
@@ -65,8 +65,7 @@ router.get('/', globalLimit, async (req, res) => {
         })
 
     } catch (err) {
-        console.error(`Get /subjects error:${err}`);
-        res.status(500).json({ error: 'Failed to get subjects' })
+        next(err);
     }
 })
 

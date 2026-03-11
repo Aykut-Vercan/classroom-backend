@@ -5,6 +5,7 @@ import cors from 'cors';
 import subjectsRouter from './routes/subjects';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import { errorHandler } from './middleware/error';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -31,11 +32,15 @@ app.use(hpp());//HPP: URL üzerinden yapılacak manipülasyonları engeller.
 app.use('/api/subjects', subjectsRouter)
 
 
+
 app.get('/', (req, res): void => {
   res.json({
     message: 'Merhaba! Sunucu çalışıyor.'
   });
 });
+
+
+app.use(errorHandler);
 
 app.listen(PORT, (): void => {
   console.log(` Sunucu çalışıyor: http://localhost:${PORT}`);
