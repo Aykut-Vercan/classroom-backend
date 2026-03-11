@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT: number = parseInt(process.env.PORT || '8000');
 
 
@@ -23,7 +24,7 @@ app.use(cors({
 }))
 
 
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json({ limit: '50kb' }));
 
 app.use(hpp());//HPP: URL üzerinden yapılacak manipülasyonları engeller.
 

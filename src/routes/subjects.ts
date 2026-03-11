@@ -2,11 +2,11 @@ import express from 'express';
 import { and, desc, eq, getTableColumns, ilike, or, sql } from 'drizzle-orm';
 import { departments, subjects } from '../db/schema';
 import { db } from '../db';
-import { globalRateLimit } from '../lib/ratelimit';
+import { getGlobalRateLimit } from '../lib/ratelimit';
 import { createRateLimitMiddleware } from '../middleware/rate-limit';
 
 const router = express.Router();
-const globalLimit = createRateLimitMiddleware(globalRateLimit);
+const globalLimit = createRateLimitMiddleware(getGlobalRateLimit);
 
 //get all subjects with optional search, filtering pagination
 router.get('/', globalLimit, async (req, res) => {
