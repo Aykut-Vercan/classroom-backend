@@ -3,9 +3,14 @@ import 'dotenv/config';
 import cors from 'cors';
 
 import subjectsRouter from './routes/subjects';
+import helmet from 'helmet';
+import hpp from 'hpp';
 
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '8000');
+
+
+app.use(helmet());//Helmet: Sunucun hakkında çok fazla bilgi veren X-Powered-By: Express başlığını gizler.
 
 if (!process.env.FRONTEND_URL) {
   throw new Error('FRONTEND_URL environment variable is required');
@@ -18,7 +23,9 @@ app.use(cors({
 }))
 
 
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
+
+app.use(hpp());//HPP: URL üzerinden yapılacak manipülasyonları engeller.
 
 app.use('/api/subjects', subjectsRouter)
 

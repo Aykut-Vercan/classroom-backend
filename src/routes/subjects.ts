@@ -2,11 +2,15 @@ import express from 'express';
 import { and, desc, eq, getTableColumns, ilike, or, sql } from 'drizzle-orm';
 import { departments, subjects } from '../db/schema';
 import { db } from '../db';
+import { globalRateLimit } from '../lib/ratelimit';
+import { createRateLimitMiddleware } from '../middleware/rate-limit';
 
 const router = express.Router();
+const globalLimit = createRateLimitMiddleware(globalRateLimit);
 
 //get all subjects with optional search, filtering pagination
-router.get('/', async (req, res) => {
+router.get('/', globalLimit, async (req, res) => {
+
     try {
         const { search, department, page = 1, limit = 10 } = req.query;
         const currentPage = Math.max(1, Number(page) || 1);
