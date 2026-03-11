@@ -1,8 +1,17 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
+// Ratelimit'in constructor'ının aldığı parametrenin tipini otomatik çıkarır.
+// Elle yazmak yerine TypeScript'e soruyoruz — kütüphane güncellense bile tip bozulmaz.
+type RatelimitConfig = ConstructorParameters<typeof Ratelimit>[0];
+
+let redisClient: Redis | null = null;
+
 // 1. Redis bağlantısını tek bir noktadan ve sadece ihtiyaç anında oluşturuyoruz
-const getRedisClient = () => {
+const getRedisClient = (): Redis | null => {
+
+    if (redisClient) return redisClient;
+
     const url = process.env.UPSTASH_REDIS_REST_URL;
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -12,44 +21,43 @@ const getRedisClient = () => {
         throw new Error('Upstash Redis env (URL or TOKEN) variable is required!');
     }
 
-    return new Redis({ url, token });
+    redisClient = new Redis({ url, token });
+    return redisClient;
 };
 
-// 2. Her bir limiter için bir "Getter" fonksiyonu oluşturuyoruz
-// Bu sayede import anında değil, sadece middleware çalıştığında kontrol yapılacak
+//Omit<RatelimitConfig, 'redis'> redis alanını config'den çıkarıyoruz çünkü onu zaten getRedisClient() ile kendimiz sağlıyoruz. 
+const createRateLimiter = (config: Omit<RatelimitConfig, 'redis'>) => {
+    let instance: Ratelimit | null = null;// her limiter'a özel cache
 
-export const getGlobalRateLimit = () => {
-    const redis = getRedisClient();
-    if (!redis) return null;
+    return (): Ratelimit | null => {
+        if (instance) return instance;// singleton kontrolü
 
-    return new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(10, "10 s"),
-        analytics: true,
-        prefix: "ratelimit_global",
-    });
+        const redis = getRedisClient();
+        if (!redis) return null;
+
+        instance = new Ratelimit({ redis, ...config });
+        return instance;
+    };
+    //config dışarıdan bir kez alınıyor.
+    //instance ise closure sayesinde her createRateLimiter çağrısında ayrı yaşıyor.
+    //Yani getGlobalRateLimit ve getAuthRateLimit'in instance'ları birbirinden tamamen izole.
 };
 
-export const getAuthRateLimit = () => {
-    const redis = getRedisClient();
-    if (!redis) return null;
+export const getGlobalRateLimit = createRateLimiter({
+    limiter: Ratelimit.slidingWindow(10, "10 s"),
+    analytics: true,
+    prefix: "ratelimit_global",
+});
 
-    return new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(5, "10 m"),
-        analytics: true,
-        prefix: "ratelimit_auth"
-    });
-};
 
-export const getEnrollRateLimit = () => {
-    const redis = getRedisClient();
-    if (!redis) return null;
+export const getAuthRateLimit = createRateLimiter({
+    limiter: Ratelimit.slidingWindow(5, "10 m"),
+    analytics: true,
+    prefix: "ratelimit_auth",
+});
 
-    return new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(3, "1 m"),
-        analytics: true,
-        prefix: "ratelimit_enroll"
-    });
-};
+export const getEnrollRateLimit = createRateLimiter({
+    limiter: Ratelimit.slidingWindow(3, "1 m"),
+    analytics: true,
+    prefix: "ratelimit_enroll",
+});
