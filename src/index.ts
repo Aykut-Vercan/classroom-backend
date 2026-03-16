@@ -5,7 +5,9 @@ import cors from 'cors';
 import subjectsRouter from './routes/subjects';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import { toNodeHandler } from "better-auth/node";
 import { errorHandler } from './middleware/error';
+import { auth } from './lib/auth';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -24,6 +26,8 @@ app.use(cors({
   credentials: true
 }))
 
+
+app.all('/api/auth/*splat', toNodeHandler(auth));
 
 app.use(express.json({ limit: '50kb' }));
 
