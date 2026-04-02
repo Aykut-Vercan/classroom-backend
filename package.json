@@ -25,7 +25,8 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
-    "postgres": "^3.4.8"
+    "postgres": "^3.4.8",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
