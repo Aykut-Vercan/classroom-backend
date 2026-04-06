@@ -20,7 +20,7 @@ export const errorHandler = (
     // Eğer biz fırlatmadıysak mesajı maskele (Güvenlik için)
     const message = isApiError ? err.message : "Sunucu tarafında teknik bir aksaklık oluştu.";
 
-    // 4. Frontend (Refine buildHttpError) ile %100 uyumlu cevap
+    // 4. response gönderme
     res.status(statusCode).json({
         status: "error",
         message: message,

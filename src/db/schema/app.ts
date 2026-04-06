@@ -55,7 +55,9 @@ export const enrollments = pgTable('enrollments', {
     index('enrollments_class_id_idx').on(table.classId),
 ]);
 
-export const departmentRelations = relations(departments, ({ many }) => ({ subjects: many(subjects) }))
+export const departmentRelations = relations(
+    departments, ({ many }) => ({ subjects: many(subjects) })
+);
 
 export const subjectsRelations = relations(subjects, ({ one, many }) => ({
     department: one(departments, {

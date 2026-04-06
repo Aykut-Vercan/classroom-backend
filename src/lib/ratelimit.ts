@@ -44,7 +44,7 @@ const createRateLimiter = (config: Omit<RatelimitConfig, 'redis'>) => {
 };
 
 export const getGlobalRateLimit = createRateLimiter({
-    limiter: Ratelimit.slidingWindow(10, "10 s"),
+    limiter: Ratelimit.slidingWindow(60, "10 s"),
     analytics: true,
     prefix: "ratelimit_global",
 });
