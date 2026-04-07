@@ -86,6 +86,28 @@ router.get('/', globalLimit, async (req, res, next) => {
     }
 });
 
+router.get('/:id', async (req, res, next) => {
+    const classId = Number(req.params.id);
+    if (!Number.isFinite(classId)) return next(new ApiError(400, 'Invalid class id, No class found'));
+
+    const [classDetails] = await db
+        .select({
+            ...getTableColumns(classes),
+            subject: { ...getTableColumns(subjects) },
+            teacher: { ...getTableColumns(user) },
+            department: { ...getTableColumns(departments) }
+        }).from(classes)
+        .leftJoin(subjects, eq(classes.subjectId, subjects.id))
+        .leftJoin(user, eq(classes.teacherId, user.id))
+        .leftJoin(departments, eq(subjects.departmentId, departments.id))
+        .where(eq(classes.id, classId));
+
+    if (!classDetails) return next(new ApiError(404, 'No class found'));
+    res.status(200).json({ data: classDetails });
+})
+
+
+
 router.post('/', globalLimit, async (req, res, next) => {
     try {
         const parsed = createClassSchema.safeParse(req.body);
