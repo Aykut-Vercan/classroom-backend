@@ -1,6 +1,6 @@
 
 import { relations } from "drizzle-orm";
-import { index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
+import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 
@@ -45,51 +45,64 @@ export const classes = pgTable('classes', {
     index('classes_subject_id_idx').on(table.subjectId),
     index('classes_teacher_id_idx').on(table.teacherId),
 ]);
-export const enrollments = pgTable('enrollments', {
-    studentId: text('student_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
-    classId: integer('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
-}, (table) => [
-    primaryKey({ columns: [table.studentId, table.classId] }),
-    unique('enrollments_student_id_class_id_unique').on(table.studentId, table.classId),
-    index('enrollments_student_id_idx').on(table.studentId),
-    index('enrollments_class_id_idx').on(table.classId),
-]);
 
-export const departmentRelations = relations(
-    departments, ({ many }) => ({ subjects: many(subjects) })
+export const enrollments = pgTable(
+    "enrollments",
+    {
+        id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+
+        studentId: text("student_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
+        classId: integer("class_id")
+            .notNull()
+            .references(() => classes.id, { onDelete: "cascade" }),
+
+        ...timestamps,
+    },
+    (table) => ({
+        studentIdIdx: index("enrollments_student_id_idx").on(table.studentId),
+        classIdIdx: index("enrollments_class_id_idx").on(table.classId),
+        studentClassUnique: unique("enrollments_student_class_unique").on(
+            table.studentId,
+            table.classId
+        ),
+    })
 );
+export const departmentsRelations = relations(departments, ({ many }) => ({
+    subjects: many(subjects),
+}));
 
 export const subjectsRelations = relations(subjects, ({ one, many }) => ({
     department: one(departments, {
         fields: [subjects.departmentId],
-        references: [departments.id]
+        references: [departments.id],
     }),
-    classes: many(classes)
-}))
+    classes: many(classes),
+}));
 
 export const classesRelations = relations(classes, ({ one, many }) => ({
     subject: one(subjects, {
         fields: [classes.subjectId],
-        references: [subjects.id]
+        references: [subjects.id],
     }),
     teacher: one(user, {
         fields: [classes.teacherId],
-        references: [user.id]
+        references: [user.id],
     }),
-    enrollments: many(enrollments)
+    enrollments: many(enrollments),
 }));
 
 export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
     student: one(user, {
         fields: [enrollments.studentId],
-        references: [user.id]
+        references: [user.id],
     }),
     class: one(classes, {
         fields: [enrollments.classId],
-        references: [classes.id]
-    })
-}))
-
+        references: [classes.id],
+    }),
+}));
 
 
 //$inferSelect = bu tabloyu SELECT edince dönecek satırın tipi.

@@ -22,6 +22,20 @@
       "when": 1773157145157,
       "tag": "0002_sad_redwing",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776079078109,
+      "tag": "0003_motionless_doctor_faustus",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776081269270,
+      "tag": "0004_bright_blacklash",
+      "breakpoints": true
     }
   ]
 }
