@@ -55,7 +55,7 @@ src/
 npm install
 
 # Set up environment variables
-cp .env.example .env
+
 
 # Run database migrations
 npm run db:migrate
